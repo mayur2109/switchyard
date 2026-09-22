@@ -31,3 +31,19 @@ def test_select_context_supports_async_harnesses():
 
     result = asyncio.run(aselect_context(Client(), "incident", candidates(), budget_bytes=500))
     assert result == {"task": "incident", "count": 2}
+
+
+def test_select_context_fails_open_with_original_payload_on_runtime_error():
+    from switchyard.errors import DecisionError
+    from switchyard.middleware import select_context
+
+    class Client:
+        def select_items(self, request):
+            raise DecisionError("runtime_unavailable", "not running")
+
+    result = select_context(Client(), "incident", candidates(), budget_bytes=500)
+    assert result["mode"] == "fallback"
+    assert result["applied"] is False
+    assert result["selected_ids"] == ["one", "two"]
+    assert result["selected_items"][0]["id"] == "one"
+    assert result["error"]["code"] == "runtime_unavailable"

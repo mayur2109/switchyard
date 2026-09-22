@@ -88,6 +88,7 @@ uv run ruff check src tests
 
 The test suite covers contracts, token-budget rejection, queue deadlines, private sockets,
 integration rollback, MCP tool boundaries, recipes, evaluation gates, and model-output validation.
+Every push and pull request runs the same checks on Linux and Apple Silicon macOS.
 
 ## License
 
