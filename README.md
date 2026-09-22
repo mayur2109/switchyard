@@ -64,6 +64,18 @@ plan = select_context(client, "billing incident", candidates, budget_bytes=12000
 forward = plan["selected_items"] if plan["applied"] else plan["recommended_selected_items"]
 ```
 
+For local MainFrame users, the optional `MainFrameProvider` searches only `Projects`, `Stacks`,
+`Patterns`, `Guidelines`, and `Notes`. It uses argument-safe `ripgrep` invocation, returns stable
+candidate IDs with Vault citations, and does not write retrieval logs or modify the Vault:
+
+```python
+from pathlib import Path
+from switchyard.mainframe import MainFrameProvider
+
+provider = MainFrameProvider(Path.home() / "MainFrame")
+candidates = provider.search("billing workflow")
+```
+
 ## Recipes and safety
 
 `candidate-relevance@1`, `log-triage@1`, and `route-selection@1` classify caller-supplied items.
