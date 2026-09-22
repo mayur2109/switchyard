@@ -55,6 +55,15 @@ Retrieval systems can implement the read-only `CandidateProvider` protocol and n
 into the shared candidate contract. Switchyard does not retrieve, write, execute, or synchronize
 external systems; integrations such as MainFrame belong outside the core runtime.
 
+Custom synchronous or asynchronous harnesses can use the thin middleware helpers:
+
+```python
+from switchyard.middleware import select_context
+
+plan = select_context(client, "billing incident", candidates, budget_bytes=12000)
+forward = plan["selected_items"] if plan["applied"] else plan["recommended_selected_items"]
+```
+
 ## Recipes and safety
 
 `candidate-relevance@1`, `log-triage@1`, and `route-selection@1` classify caller-supplied items.
