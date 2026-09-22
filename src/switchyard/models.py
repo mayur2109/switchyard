@@ -98,7 +98,7 @@ def verify_model(settings: Settings, name: str) -> dict:
         return manifest
     except (OSError, KeyError, ValueError) as error:
         raise DecisionError(
-            "model_unavailable", f"Fetch or repair the {name} model with ldk models fetch"
+            "model_unavailable", f"Fetch or repair the {name} model with switchyard models fetch"
         ) from error
 
 

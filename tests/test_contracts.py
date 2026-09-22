@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 
 def test_valid_typed_questions():
-    from local_decision_kit.contracts import DecisionRequest
+    from switchyard.contracts import DecisionRequest
 
     request = DecisionRequest.model_validate(
         {
@@ -38,14 +38,14 @@ def test_valid_typed_questions():
     ],
 )
 def test_invalid_question_rejected(question):
-    from local_decision_kit.contracts import DecisionRequest
+    from switchyard.contracts import DecisionRequest
 
     with pytest.raises(ValidationError):
         DecisionRequest(state="sample", questions={"q": question})
 
 
 def test_state_rejects_non_finite_numbers_and_extra_fields():
-    from local_decision_kit.contracts import DecisionRequest
+    from switchyard.contracts import DecisionRequest
 
     with pytest.raises(ValidationError):
         DecisionRequest(state={"value": float("nan")}, questions={})
@@ -58,7 +58,7 @@ def test_state_rejects_non_finite_numbers_and_extra_fields():
 
 
 def test_duplicate_items_rejected():
-    from local_decision_kit.contracts import ItemsRequest
+    from switchyard.contracts import ItemsRequest
 
     with pytest.raises(ValidationError):
         ItemsRequest(
@@ -69,9 +69,9 @@ def test_duplicate_items_rejected():
 
 
 def test_rejects_silent_head_and_state_truncation():
-    from local_decision_kit.budget import check_budget
-    from local_decision_kit.contracts import Question
-    from local_decision_kit.errors import DecisionError
+    from switchyard.budget import check_budget
+    from switchyard.contracts import Question
+    from switchyard.errors import DecisionError
 
     class Tokenizer:
         mask_token = "[MASK]"
@@ -96,8 +96,8 @@ def test_rejects_silent_head_and_state_truncation():
 
 
 def test_malformed_model_answer_is_error_not_negative():
-    from local_decision_kit.contracts import Question, validate_answers
-    from local_decision_kit.errors import DecisionError
+    from switchyard.contracts import Question, validate_answers
+    from switchyard.errors import DecisionError
 
     questions = {"q": Question(type="noul", instructions="Check")}
     with pytest.raises(DecisionError, match="invalid_model_output"):

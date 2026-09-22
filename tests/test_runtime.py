@@ -22,7 +22,7 @@ def payload(timeout=1000):
 
 
 async def test_service_dispatch_and_validation():
-    from local_decision_kit.runtime import DecisionService
+    from switchyard.runtime import DecisionService
 
     async with DecisionService(Engine(), queue_size=2) as service:
         result = await service.dispatch({"method": "decide", "params": payload()})
@@ -32,8 +32,8 @@ async def test_service_dispatch_and_validation():
 
 
 async def test_deadline_does_not_release_worker_while_inference_is_running():
-    from local_decision_kit.errors import DecisionError
-    from local_decision_kit.runtime import DecisionService
+    from switchyard.errors import DecisionError
+    from switchyard.runtime import DecisionService
 
     release = threading.Event()
     started = threading.Event()
@@ -62,8 +62,8 @@ async def test_deadline_does_not_release_worker_while_inference_is_running():
 
 
 async def test_socket_permissions_client_and_shutdown(tmp_path):
-    from local_decision_kit.client import AsyncClient
-    from local_decision_kit.runtime import DecisionService, SocketServer
+    from switchyard.client import AsyncClient
+    from switchyard.runtime import DecisionService, SocketServer
 
     socket = tmp_path / "runtime" / "kit.sock"
     async with DecisionService(Engine()) as service:
@@ -89,9 +89,9 @@ async def test_socket_permissions_client_and_shutdown(tmp_path):
 
 
 def test_private_config_and_unchanged_existing_file(tmp_path):
-    from local_decision_kit.config import Settings, initialize, load_settings
+    from switchyard.config import Settings, initialize, load_settings
 
-    settings = initialize(tmp_path / "ldk")
+    settings = initialize(tmp_path / "switchyard")
     assert settings.models == ["english", "multilingual"]
     config = settings.home / "config.json"
     assert config.stat().st_mode & 0o777 == 0o600
@@ -104,9 +104,9 @@ def test_private_config_and_unchanged_existing_file(tmp_path):
 
 
 def test_missing_models_never_trigger_network(tmp_path):
-    from local_decision_kit.config import Settings
-    from local_decision_kit.engine import LayaEngine
-    from local_decision_kit.errors import DecisionError
+    from switchyard.config import Settings
+    from switchyard.engine import LayaEngine
+    from switchyard.errors import DecisionError
 
     with pytest.raises(DecisionError, match="model_unavailable"):
         LayaEngine(Settings(home=tmp_path)).load()

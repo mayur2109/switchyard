@@ -8,7 +8,7 @@ from .contracts import DecisionRequest, ItemsRequest
 
 
 def create_server(client: AsyncClient | None = None) -> FastMCP:
-    server = FastMCP("Local Decision Kit")
+    server = FastMCP("Switchyard")
     client = client or AsyncClient()
     annotations = ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False)
 

@@ -1,4 +1,4 @@
-# Local Decision Kit
+# Switchyard
 
 Local typed decisions for agents and applications, powered by the open-weight Laya decision engine.
 
@@ -17,24 +17,24 @@ Python 3.12 is supported on Linux and macOS.
 
 ```bash
 uv sync --extra inference
-uv run ldk init
-uv run ldk models fetch
-uv run ldk serve --background
+uv run switchyard init
+uv run switchyard models fetch
+uv run switchyard serve --background
 ```
 
 `models fetch` is the only command that needs network access. It downloads the pinned Laya
 revision and records SHA-256 checksums. Inference uses the local files and sets the Hugging Face
 and Transformers offline flags. The first English and multilingual checkpoints need about 1.5 GB
-plus runtime memory. Use `LDK_HOME` to choose the per-user data directory.
+plus runtime memory. Use `SWITCHYARD_HOME` to choose the per-user data directory.
 
 ## Use it
 
 ```bash
 printf '%s' '{"state":"The build fails in billing","questions":{"route":{"type":"choice","instructions":"Which team owns this?","criteria":{"engineering":"software","billing":"payments"}},"urgent":{"type":"noul","instructions":"Is this urgent?"}}}' \
-  | uv run ldk decide
+  | uv run switchyard decide
 ```
 
-The same contracts are available through Python and MCP. `uv run ldk mcp` exposes only `decide`,
+The same contracts are available through Python and MCP. `uv run switchyard mcp` exposes only `decide`,
 `evaluate_items`, and `capabilities`. These are read-only tools. MCP forwards to one warm local
 process over a user-owned Unix socket so model weights are not loaded for every call.
 
@@ -46,7 +46,7 @@ start in advisory mode. Runtime failures and uncertain predictions keep the orig
 
 Automatic omission is disabled until a held-out report for the exact recipe, model revision, and
 pipeline fingerprint meets the retention gate. The report estimates characters removed. It does
-not claim provider token savings. Use `ldk bench`, `ldk report`, and `ldk policy enable` only after
+not claim provider token savings. Use `switchyard bench`, `switchyard report`, and `switchyard policy enable` only after
 reviewing the labeled dataset and report.
 
 The Claude hook is opt-in, reversible, and advisory. It only observes a caller-supplied

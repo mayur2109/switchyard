@@ -4,9 +4,9 @@ from typer.testing import CliRunner
 
 
 def test_cli_init_doctor_and_schemas(tmp_path, monkeypatch):
-    from local_decision_kit.cli import app
+    from switchyard.cli import app
 
-    monkeypatch.setenv("LDK_HOME", str(tmp_path / "kit"))
+    monkeypatch.setenv("SWITCHYARD_HOME", str(tmp_path / "kit"))
     runner = CliRunner()
     result = runner.invoke(app, ["init"])
     assert result.exit_code == 0, result.output
@@ -20,7 +20,7 @@ def test_cli_init_doctor_and_schemas(tmp_path, monkeypatch):
 
 
 def test_invalid_stdin_returns_structured_error_without_echoing_content():
-    from local_decision_kit.cli import app
+    from switchyard.cli import app
 
     result = CliRunner().invoke(app, ["decide"], input='{"secret": "must-not-echo"}')
     assert result.exit_code == 2
@@ -31,7 +31,7 @@ def test_invalid_stdin_returns_structured_error_without_echoing_content():
 def test_mcp_tool_contracts_do_not_expose_execution():
     import asyncio
 
-    from local_decision_kit.mcp_server import create_server
+    from switchyard.mcp_server import create_server
 
     server = create_server()
     tools = asyncio.run(server.list_tools())

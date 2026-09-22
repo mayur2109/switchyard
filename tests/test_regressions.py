@@ -12,8 +12,8 @@ def test_model_output_validation_cannot_be_disabled_by_python_optimization():
             "-O",
             "-c",
             """
-from local_decision_kit.contracts import Question, validate_answers
-from local_decision_kit.errors import DecisionError
+from switchyard.contracts import Question, validate_answers
+from switchyard.errors import DecisionError
 try:
     validate_answers({'q': Question(type='noul', instructions='Check')},
                      {'q': {'type': 'noul', 'noul': float('nan'), 'confidence': 0.9}})
@@ -30,7 +30,7 @@ raise SystemExit(1)
 async def test_disconnected_client_is_cleaned_up(tmp_path):
     import time
 
-    from local_decision_kit.runtime import DecisionService, SocketServer
+    from switchyard.runtime import DecisionService, SocketServer
 
     class Engine:
         def capabilities(self):
@@ -61,8 +61,8 @@ async def test_disconnected_client_is_cleaned_up(tmp_path):
 
 
 def test_choice_winner_must_agree_with_probabilities():
-    from local_decision_kit.contracts import Question, validate_answers
-    from local_decision_kit.errors import DecisionError
+    from switchyard.contracts import Question, validate_answers
+    from switchyard.errors import DecisionError
 
     with pytest.raises(DecisionError):
         validate_answers(
@@ -83,8 +83,8 @@ def test_choice_winner_must_agree_with_probabilities():
 
 
 def test_new_settings_parent_is_private(tmp_path):
-    from local_decision_kit.integrations import install
+    from switchyard.integrations import install
 
     path = tmp_path / ".claude" / "settings.json"
-    install(path, "/opt/kit/ldk", "mcp__docs__search")
+    install(path, "/opt/kit/switchyard", "mcp__docs__search")
     assert path.parent.stat().st_mode & 0o777 == 0o700

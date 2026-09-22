@@ -68,7 +68,7 @@ def models_fetch(name: str | None = typer.Argument(None)):
     except DecisionError as error:
         fail(error)
     except Exception:
-        fail(DecisionError("download_failed", "Download failed; retry ldk models fetch"))
+        fail(DecisionError("download_failed", "Download failed; retry switchyard models fetch"))
 
 
 @models_app.command("verify")
@@ -96,7 +96,7 @@ async def _serve(settings):
             for sig in (signal.SIGTERM, signal.SIGINT):
                 loop.add_signal_handler(sig, server.stopped.set)
             await asyncio.to_thread(engine.load)
-            typer.echo("Local Decision Kit is ready", err=True)
+            typer.echo("Switchyard is ready", err=True)
             await server.stopped.wait()
         finally:
             await server.close()
@@ -104,7 +104,7 @@ async def _serve(settings):
 
 @app.command()
 def serve(background: bool = typer.Option(False, help="Start a detached per-user runtime")):
-    """Run one warm CPU runtime. Use ldk stop for a clean shutdown."""
+    """Run one warm CPU runtime. Use switchyard stop for a clean shutdown."""
     try:
         settings = initialize()
         if background:
@@ -119,7 +119,7 @@ def serve(background: bool = typer.Option(False, help="Start a detached per-user
             fd = os.open(log, os.O_CREAT | os.O_WRONLY | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
             with os.fdopen(fd, "w") as stream:
                 process = subprocess.Popen(
-                    [sys.executable, "-m", "local_decision_kit", "serve"],
+                    [sys.executable, "-m", "switchyard", "serve"],
                     stdin=subprocess.DEVNULL,
                     stdout=stream,
                     stderr=stream,
@@ -136,7 +136,9 @@ def serve(background: bool = typer.Option(False, help="Start a detached per-user
                 except DecisionError:
                     pass
                 time.sleep(0.5)
-            raise DecisionError("startup_pending", "Runtime is still loading; inspect ldk status")
+            raise DecisionError(
+                "startup_pending", "Runtime is still loading; inspect switchyard status"
+            )
         asyncio.run(_serve(settings))
     except (DecisionError, ValueError) as error:
         fail(error)
@@ -250,7 +252,7 @@ def hook():
 
 
 def _executable() -> str:
-    return str(Path(sys.executable).parent / "ldk")
+    return str(Path(sys.executable).parent / "switchyard")
 
 
 @integrations_app.command("inspect")
@@ -259,10 +261,10 @@ def integrations_inspect():
     output(
         {
             "mcpServers": {
-                "local-decision-kit": {
+                "switchyard": {
                     "command": _executable(),
                     "args": ["mcp"],
-                    "env": {"LDK_HOME": str(load_settings().home)},
+                    "env": {"SWITCHYARD_HOME": str(load_settings().home)},
                 }
             },
             "hook_mode": "advisory",

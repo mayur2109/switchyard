@@ -24,7 +24,7 @@ def _entry(executable: str, tool: str) -> dict:
 
 
 def _metadata(path: Path) -> Path:
-    return path.with_name(path.name + ".ldk-backup.json")
+    return path.with_name(path.name + ".switchyard-backup.json")
 
 
 def preview(path: Path, executable: str, tool: str) -> dict:
@@ -80,7 +80,7 @@ def remove(path: Path) -> dict:
             import os
             import tempfile
 
-            fd, temp = tempfile.mkstemp(dir=path.parent, prefix=".ldk-restore-")
+            fd, temp = tempfile.mkstemp(dir=path.parent, prefix=".switchyard-restore-")
             try:
                 with os.fdopen(fd, "wb") as stream:
                     stream.write(base64.b64decode(metadata["original"]))

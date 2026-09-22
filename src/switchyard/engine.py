@@ -35,11 +35,11 @@ class LayaEngine:
                     self.router.attach(name, agent)
         except ImportError as error:
             raise DecisionError(
-                "dependency_missing", "Install local-decision-kit[inference]"
+                "dependency_missing", "Install switchyard[inference]"
             ) from error
         except Exception as error:
             raise DecisionError(
-                "model_load_failed", "Model could not be loaded; run ldk doctor"
+                "model_load_failed", "Model could not be loaded; run switchyard doctor"
             ) from error
 
     def capabilities(self):

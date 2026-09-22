@@ -14,7 +14,7 @@ from .errors import DecisionError
 
 
 def default_home() -> Path:
-    return Path(os.environ.get("LDK_HOME", user_data_path("local-decision-kit"))).expanduser()
+    return Path(os.environ.get("SWITCHYARD_HOME", user_data_path("switchyard"))).expanduser()
 
 
 def private_directory(path: Path):
@@ -26,7 +26,7 @@ def private_directory(path: Path):
 
 
 def atomic_json(path: Path, value):
-    fd, temporary = tempfile.mkstemp(prefix=".ldk-", dir=path.parent)
+    fd, temporary = tempfile.mkstemp(prefix=".switchyard-", dir=path.parent)
     try:
         with os.fdopen(fd, "w") as stream:
             json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
@@ -51,7 +51,7 @@ class Settings(StrictModel):
 
     @property
     def socket(self) -> Path:
-        return self.home / "runtime" / "ldk.sock"
+        return self.home / "runtime" / "switchyard.sock"
 
     @property
     def model_store(self) -> Path:

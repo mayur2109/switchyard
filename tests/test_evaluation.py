@@ -4,7 +4,7 @@ import pytest
 
 
 def test_measurements_separate_predictions_from_verified_facts():
-    from local_decision_kit.evaluation import summarize
+    from switchyard.evaluation import summarize
 
     rows = [
         {
@@ -46,7 +46,7 @@ def test_measurements_separate_predictions_from_verified_facts():
 
 
 def test_small_fixture_set_cannot_enable_omission():
-    from local_decision_kit.evaluation import summarize
+    from switchyard.evaluation import summarize
 
     row = {
         "id": "a",
@@ -62,15 +62,15 @@ def test_small_fixture_set_cannot_enable_omission():
 
 
 def test_gate_requires_heldout_evidence_and_current_recipe(tmp_path):
-    from local_decision_kit.errors import DecisionError
-    from local_decision_kit.policy import enable_policy
+    from switchyard.errors import DecisionError
+    from switchyard.policy import enable_policy
 
     with pytest.raises(DecisionError, match="evaluation_required"):
         enable_policy(tmp_path, {"metrics": {"gate_eligible": True}})
 
 
 def test_active_policy_never_drops_uncertain_or_mandatory_items():
-    from local_decision_kit.policy import apply_policy
+    from switchyard.policy import apply_policy
 
     items = [
         {"id": "a", "assessment": "irrelevant", "mandatory": True},
@@ -85,7 +85,7 @@ def test_active_policy_never_drops_uncertain_or_mandatory_items():
 
 
 def test_report_rejects_duplicate_case_ids_and_missing_labels():
-    from local_decision_kit.evaluation import Dataset
+    from switchyard.evaluation import Dataset
 
     with pytest.raises(ValueError):
         Dataset.model_validate(

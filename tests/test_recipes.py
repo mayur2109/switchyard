@@ -8,7 +8,7 @@ class FakeEngine:
 
     def decide(self, request):
         if self.fail:
-            from local_decision_kit.errors import DecisionError
+            from switchyard.errors import DecisionError
 
             raise DecisionError("model_unavailable", "Test model unavailable")
         return {
@@ -20,8 +20,8 @@ class FakeEngine:
 
 
 def test_relevance_preserves_ids_trust_and_mandatory_items():
-    from local_decision_kit.contracts import ItemsRequest
-    from local_decision_kit.recipes import evaluate_items
+    from switchyard.contracts import ItemsRequest
+    from switchyard.recipes import evaluate_items
 
     result = evaluate_items(
         FakeEngine(),
@@ -42,8 +42,8 @@ def test_relevance_preserves_ids_trust_and_mandatory_items():
 
 
 def test_failed_inference_keeps_input_and_reports_failure():
-    from local_decision_kit.contracts import ItemsRequest
-    from local_decision_kit.recipes import evaluate_items
+    from switchyard.contracts import ItemsRequest
+    from switchyard.recipes import evaluate_items
 
     result = evaluate_items(
         FakeEngine(fail=True),
@@ -57,8 +57,8 @@ def test_failed_inference_keeps_input_and_reports_failure():
 
 
 def test_log_exit_status_is_not_overridden_by_model():
-    from local_decision_kit.contracts import ItemsRequest
-    from local_decision_kit.recipes import evaluate_items
+    from switchyard.contracts import ItemsRequest
+    from switchyard.recipes import evaluate_items
 
     request = ItemsRequest(
         recipe="log-triage@1",
@@ -74,7 +74,7 @@ def test_log_exit_status_is_not_overridden_by_model():
 
 
 def test_unknown_recipe_rejected():
-    from local_decision_kit.contracts import ItemsRequest
+    from switchyard.contracts import ItemsRequest
 
     with pytest.raises(ValueError):
         ItemsRequest(recipe="execute-shell@1", task="x", items=[])

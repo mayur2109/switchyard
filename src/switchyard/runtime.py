@@ -23,7 +23,7 @@ class DecisionService:
     def __init__(self, engine, queue_size=16):
         self.engine = engine
         self.queue = asyncio.Queue(maxsize=queue_size)
-        self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="ldk-inference")
+        self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="switchyard-inference")
         self.worker = None
         self.count = 0
         self.errors = 0
@@ -101,7 +101,9 @@ class SocketServer:
     async def start(self):
         private_directory(self.path.parent)
         if len(os.fsencode(self.path)) > 100:
-            raise DecisionError("unsafe_path", "Socket path is too long; use a shorter LDK_HOME")
+            raise DecisionError(
+                "unsafe_path", "Socket path is too long; use a shorter SWITCHYARD_HOME"
+            )
         lock_path = self.path.with_suffix(".lock")
         self.lock_fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
         try:

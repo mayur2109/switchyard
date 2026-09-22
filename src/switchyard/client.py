@@ -33,7 +33,7 @@ class AsyncClient:
                 return reply["result"]
         except (FileNotFoundError, ConnectionRefusedError) as error:
             raise DecisionError(
-                "runtime_unavailable", "Start the runtime with ldk serve"
+                "runtime_unavailable", "Start the runtime with switchyard serve"
             ) from error
         except TimeoutError as error:
             raise DecisionError(
