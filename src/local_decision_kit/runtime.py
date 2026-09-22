@@ -120,6 +120,11 @@ class SocketServer:
     async def _accept(self, reader, writer):
         task = asyncio.current_task()
         self.connections.add(task)
+
+        def forget(done):
+            self.connections.discard(done)
+
+        task.add_done_callback(forget)
         dispatch = disconnect = None
         try:
             async with asyncio.timeout(125):
@@ -164,7 +169,6 @@ class SocketServer:
         except (ConnectionError, BrokenPipeError):
             pass
         finally:
-            self.connections.discard(task)
             writer.close()
             with contextlib.suppress(ConnectionError):
                 await writer.wait_closed()
@@ -172,8 +176,13 @@ class SocketServer:
     async def close(self):
         if self.server:
             self.server.close()
-            await self.server.wait_closed()
-            # Existing callers get their result; native inference cannot be force-cancelled safely.
+            with contextlib.suppress(TimeoutError):
+                async with asyncio.timeout(2):
+                    await self.server.wait_closed()
+            # A disconnected client must not hold shutdown. Native inference continues in the
+            # service worker and the queued future is resolved or expired independently.
+            for connection in list(self.connections):
+                connection.cancel()
             if self.connections:
                 await asyncio.gather(*self.connections, return_exceptions=True)
             self.connections.clear()
