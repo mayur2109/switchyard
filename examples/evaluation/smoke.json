@@ -1,0 +1,52 @@
+{
+  "split": "smoke",
+  "recipe": "candidate-relevance@1",
+  "budget_bytes": 1200,
+  "cases": [
+    {
+      "id": "billing-routing-1",
+      "task": "route a billing incident",
+      "items": [
+        {
+          "id": "billing-policy",
+          "text": "Billing incidents follow the approved payment reconciliation workflow.",
+          "citation": "example://billing-policy",
+          "trust": "curated",
+          "mandatory": true
+        },
+        {
+          "id": "weather-note",
+          "text": "The weather dashboard was refreshed this morning.",
+          "citation": "example://weather-note",
+          "trust": "unverified"
+        }
+      ],
+      "relevant": {
+        "billing-policy": true,
+        "weather-note": false
+      }
+    },
+    {
+      "id": "billing-routing-2",
+      "task": "find the payment escalation owner",
+      "items": [
+        {
+          "id": "escalation-owner",
+          "text": "Payment failures escalate to the billing operations owner.",
+          "citation": "example://escalation-owner",
+          "trust": "curated"
+        },
+        {
+          "id": "garden-note",
+          "text": "The garden maintenance checklist is complete.",
+          "citation": "example://garden-note",
+          "trust": "unverified"
+        }
+      ],
+      "relevant": {
+        "escalation-owner": true,
+        "garden-note": false
+      }
+    }
+  ]
+}

@@ -87,6 +87,13 @@ pipeline fingerprint meets the retention gate. The report estimates characters r
 not claim provider token savings. Use `switchyard bench`, `switchyard report`, and `switchyard policy enable` only after
 reviewing the labeled dataset and report.
 
+An anonymized smoke corpus is included for exercising the workflow:
+
+```bash
+uv run switchyard bench examples/evaluation/smoke.json --report /tmp/switchyard-smoke.json
+uv run switchyard report /tmp/switchyard-smoke.json
+```
+
 The Claude hook is opt-in, reversible, and advisory. It only observes a caller-supplied
 `decision_candidates` envelope. It does not grant permissions or replace tool output.
 
