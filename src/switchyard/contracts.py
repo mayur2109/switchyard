@@ -125,7 +125,10 @@ def validate_answers(questions: dict[str, Question], answers: dict) -> dict:
                 ):
                     raise ValueError("invalid probability distribution")
                 if question.type == "choice":
-                    if answer["choice"] not in expected:
+                    if (
+                        answer["choice"] not in expected
+                        or answer["choice"] != max(probs, key=probs.get)
+                    ):
                         raise ValueError("invalid choice")
                 else:
                     if (
