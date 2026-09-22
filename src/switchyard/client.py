@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from .config import load_settings
-from .contracts import DecisionRequest, ItemsRequest
+from .contracts import DecisionRequest, ItemsRequest, SelectionRequest
 from .errors import DecisionError
 from .runtime import MAX_FRAME
 
@@ -53,6 +53,9 @@ class AsyncClient:
     async def evaluate_items(self, request: ItemsRequest) -> dict:
         return await self.call("evaluate_items", request.model_dump(mode="json"))
 
+    async def select_items(self, request: SelectionRequest) -> dict:
+        return await self.call("select_items", request.model_dump(mode="json"))
+
 
 class Client:
     """Synchronous API. Use AsyncClient inside an existing asyncio event loop."""
@@ -68,3 +71,6 @@ class Client:
 
     def evaluate_items(self, request: ItemsRequest) -> dict:
         return self.call("evaluate_items", request.model_dump(mode="json"))
+
+    def select_items(self, request: SelectionRequest) -> dict:
+        return self.call("select_items", request.model_dump(mode="json"))

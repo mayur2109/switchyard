@@ -35,8 +35,25 @@ printf '%s' '{"state":"The build fails in billing","questions":{"route":{"type":
 ```
 
 The same contracts are available through Python and MCP. `uv run switchyard mcp` exposes only `decide`,
-`evaluate_items`, and `capabilities`. These are read-only tools. MCP forwards to one warm local
+`evaluate_items`, `select_items`, and `capabilities`. These are read-only tools. MCP forwards to one warm local
 process over a user-owned Unix socket so model weights are not loaded for every call.
+
+## Select context
+
+`switchyard select` evaluates caller-supplied candidates and returns an auditable budgeted plan.
+Mandatory candidates are preserved, remaining candidates are ranked by relevance, and uncertain or
+failed predictions remain available as fallback. Selection is advisory until a reviewed holdout
+report enables a recipe policy; advisory responses include both the recommended IDs and the original
+forwardable payload.
+
+```bash
+printf '%s' '{"recipe":"candidate-relevance@1","task":"billing incident","budget_bytes":12000,"items":[{"id":"note-1","text":"billing decision","citation":"vault://note-1","trust":"curated","mandatory":true}]}' \
+  | uv run switchyard select
+```
+
+Retrieval systems can implement the read-only `CandidateProvider` protocol and normalize results
+into the shared candidate contract. Switchyard does not retrieve, write, execute, or synchronize
+external systems; integrations such as MainFrame belong outside the core runtime.
 
 ## Recipes and safety
 

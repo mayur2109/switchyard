@@ -16,12 +16,14 @@ class LayaEngine:
         self.settings = settings
         self.agents = {}
         self.router = None
+        self.state = "starting"
 
     def load(self):
-        for name in self.settings.models:
-            verify_model(self.settings, name)
-        offline_environment()
+        self.state = "loading"
         try:
+            for name in self.settings.models:
+                verify_model(self.settings, name)
+            offline_environment()
             import laya
             import torch
             from laya import Router
@@ -33,11 +35,17 @@ class LayaEngine:
                     agent = laya.load(str(model_path(self.settings, name)), device="cpu")
                     self.agents[name] = agent
                     self.router.attach(name, agent)
+            self.state = "ready"
         except ImportError as error:
+            self.state = "degraded"
             raise DecisionError(
                 "dependency_missing", "Install switchyard[inference]"
             ) from error
+        except DecisionError:
+            self.state = "degraded"
+            raise
         except Exception as error:
+            self.state = "degraded"
             raise DecisionError(
                 "model_load_failed", "Model could not be loaded; run switchyard doctor"
             ) from error
@@ -45,7 +53,8 @@ class LayaEngine:
     def capabilities(self):
         return {
             "protocol_version": 1,
-            "ready": bool(self.agents),
+            "ready": self.state == "ready",
+            "state": self.state,
             "device": "cpu",
             "models": {
                 name: {

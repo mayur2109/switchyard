@@ -4,7 +4,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
 from .client import AsyncClient
-from .contracts import DecisionRequest, ItemsRequest
+from .contracts import DecisionRequest, ItemsRequest, SelectionRequest
 
 
 def create_server(client: AsyncClient | None = None) -> FastMCP:
@@ -29,6 +29,11 @@ def create_server(client: AsyncClient | None = None) -> FastMCP:
         No filesystem or network knowledge retrieval occurs.
         """
         return await client.evaluate_items(request)
+
+    @server.tool(annotations=annotations)
+    async def select_items(request: SelectionRequest) -> dict:
+        """Build a budgeted context plan while preserving mandatory and uncertain items."""
+        return await client.select_items(request)
 
     @server.tool(annotations=annotations)
     async def capabilities() -> dict:

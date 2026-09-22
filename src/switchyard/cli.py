@@ -16,7 +16,7 @@ from pydantic import ValidationError
 
 from .client import Client
 from .config import initialize, load_settings
-from .contracts import DecisionRequest, ItemsRequest
+from .contracts import DecisionRequest, ItemsRequest, SelectionRequest
 from .errors import DecisionError
 
 app = typer.Typer(no_args_is_help=True, help="Local typed decisions for agents and applications.")
@@ -187,12 +187,25 @@ def evaluate():
 
 
 @app.command()
+def select():
+    """Read a SelectionRequest from stdin and return an auditable context plan."""
+    try:
+        request = SelectionRequest.model_validate(read_input())
+        output(Client().select_items(request))
+    except (ValidationError, ValueError) as error:
+        fail(error, 2)
+    except DecisionError as error:
+        fail(error)
+
+
+@app.command()
 def schemas():
     """Print authoritative JSON schemas for the public request types."""
     output(
         {
             "DecisionRequest": DecisionRequest.model_json_schema(),
             "ItemsRequest": ItemsRequest.model_json_schema(),
+            "SelectionRequest": SelectionRequest.model_json_schema(),
         }
     )
 

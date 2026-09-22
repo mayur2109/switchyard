@@ -10,6 +10,7 @@ from .errors import DecisionError
 
 ModelName = Literal["auto", "english", "multilingual", "typed-decisions"]
 RecipeName = Literal["candidate-relevance@1", "log-triage@1", "route-selection@1"]
+SelectionRecipeName = Literal["candidate-relevance@1", "log-triage@1"]
 
 
 class StrictModel(BaseModel):
@@ -92,6 +93,24 @@ class ItemsRequest(StrictModel):
             Question(type="choice", instructions=self.task, criteria=self.routes)
         elif self.routes is not None:
             raise ValueError("routes is only valid for route-selection@1")
+        return self
+
+
+class SelectionRequest(StrictModel):
+    recipe: SelectionRecipeName
+    task: str = Field(min_length=1, max_length=8192)
+    items: list[Item] = Field(min_length=1, max_length=128)
+    budget_bytes: int = Field(ge=1, le=2_000_000)
+    budget_tokens: int | None = Field(default=None, ge=1, le=500_000)
+    model: ModelName = "auto"
+    timeout_ms: int = Field(default=30000, ge=100, le=120000)
+
+    @model_validator(mode="after")
+    def validate_items(self):
+        if len({item.id for item in self.items}) != len(self.items):
+            raise ValueError("Item IDs must be unique")
+        if sum(len(item.text.encode()) for item in self.items) > 512_000:
+            raise ValueError("Items exceed 512 KB")
         return self
 
 

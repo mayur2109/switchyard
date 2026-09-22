@@ -31,6 +31,31 @@ async def test_service_dispatch_and_validation():
             await service.dispatch({"method": "decide", "params": {"state": "bad"}})
 
 
+async def test_service_dispatches_budgeted_selection():
+    from switchyard.runtime import DecisionService
+
+    class SelectionEngine(Engine):
+        def decide(self, request):
+            return {
+                "answers": {
+                    "relevant": {"type": "noul", "noul": 0.9, "confidence": 0.9}
+                },
+                "model": "english",
+                "revision": "test",
+            }
+
+    params = {
+        "recipe": "candidate-relevance@1",
+        "task": "keep useful context",
+        "items": [{"id": "a", "text": "useful"}],
+        "budget_bytes": 1000,
+    }
+    async with DecisionService(SelectionEngine()) as service:
+        result = await service.dispatch({"method": "select_items", "params": params})
+    assert result["selected_ids"] == ["a"]
+    assert result["recommended_selected_ids"] == ["a"]
+
+
 async def test_deadline_does_not_release_worker_while_inference_is_running():
     from switchyard.errors import DecisionError
     from switchyard.runtime import DecisionService
@@ -108,5 +133,8 @@ def test_missing_models_never_trigger_network(tmp_path):
     from switchyard.engine import LayaEngine
     from switchyard.errors import DecisionError
 
+    engine = LayaEngine(Settings(home=tmp_path))
     with pytest.raises(DecisionError, match="model_unavailable"):
-        LayaEngine(Settings(home=tmp_path)).load()
+        engine.load()
+    assert engine.capabilities()["state"] == "degraded"
+    assert engine.capabilities()["ready"] is False

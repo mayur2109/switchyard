@@ -14,6 +14,7 @@ def test_cli_init_doctor_and_schemas(tmp_path, monkeypatch):
     schema = runner.invoke(app, ["schemas"])
     assert schema.exit_code == 0
     assert "DecisionRequest" in json.loads(schema.output)
+    assert "SelectionRequest" in json.loads(schema.output)
     doctor = runner.invoke(app, ["doctor"])
     assert doctor.exit_code == 1
     assert json.loads(doctor.output)["ready"] is False
@@ -35,6 +36,11 @@ def test_mcp_tool_contracts_do_not_expose_execution():
 
     server = create_server()
     tools = asyncio.run(server.list_tools())
-    assert {tool.name for tool in tools} == {"decide", "evaluate_items", "capabilities"}
+    assert {tool.name for tool in tools} == {
+        "decide",
+        "evaluate_items",
+        "select_items",
+        "capabilities",
+    }
     for tool in tools:
         assert tool.annotations.readOnlyHint is True

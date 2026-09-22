@@ -12,7 +12,7 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from .config import private_directory
-from .contracts import DecisionRequest, ItemsRequest
+from .contracts import DecisionRequest, ItemsRequest, SelectionRequest
 from .errors import DecisionError
 from .recipes import evaluate_items
 
@@ -76,6 +76,13 @@ class DecisionService:
 
             def function(value):
                 return evaluate_items(self.engine, value)
+        elif method == "select_items":
+            request = SelectionRequest.model_validate(params)
+
+            def function(value):
+                from .recipes import select_items
+
+                return select_items(self.engine, value)
         else:
             raise DecisionError("unknown_method", "Unknown decision method")
         future = asyncio.get_running_loop().create_future()
