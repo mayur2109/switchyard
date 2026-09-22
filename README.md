@@ -58,10 +58,10 @@ external systems; integrations such as MainFrame belong outside the core runtime
 Custom synchronous or asynchronous harnesses can use the thin middleware helpers:
 
 ```python
-from switchyard.middleware import select_context
+from switchyard.middleware import forward_candidates, select_context
 
 plan = select_context(client, "billing incident", candidates, budget_bytes=12000)
-forward = plan["selected_items"] if plan["applied"] else plan["recommended_selected_items"]
+forward = forward_candidates(tool_envelope, plan)
 ```
 
 For local MainFrame users, the optional `MainFrameProvider` searches only `Projects`, `Stacks`,

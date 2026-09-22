@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
-from .contracts import Item, ItemsRequest, StrictModel
+from .contracts import Item, SelectionRequest, StrictModel
 from .models import REVISION
 
 
@@ -31,6 +31,7 @@ class Case(StrictModel):
 class Dataset(StrictModel):
     split: Literal["smoke", "holdout"]
     recipe: Literal["candidate-relevance@1", "log-triage@1"]
+    budget_bytes: int = Field(default=12000, ge=1, le=2_000_000)
     cases: list[Case] = Field(min_length=1, max_length=10000)
 
     @model_validator(mode="after")
@@ -85,14 +86,20 @@ def benchmark(client, dataset: Dataset) -> dict:
     began = time.monotonic()
     for case in dataset.cases:
         started = time.monotonic()
-        request = ItemsRequest(
-            recipe=dataset.recipe, task=case.task, items=case.items, timeout_ms=120000
+        request = SelectionRequest(
+            recipe=dataset.recipe,
+            task=case.task,
+            items=case.items,
+            budget_bytes=dataset.budget_bytes,
+            timeout_ms=120000,
         )
-        result = client.evaluate_items(request)
+        result = client.select_items(request)
         latency = (time.monotonic() - started) * 1000
         for item in result["items"]:
             would_omit = (
-                item["assessment"] == "irrelevant" and not item["mandatory"] and "error" not in item
+                item["id"] not in result["recommended_selected_ids"]
+                and not item["mandatory"]
+                and not item.get("error")
             )
             # A transparent lexical baseline; no model involved.
             words = {word.lower().strip(".,:;?!") for word in case.task.split() if len(word) > 3}
@@ -119,6 +126,7 @@ def benchmark(client, dataset: Dataset) -> dict:
         "created_at": datetime.now(UTC).isoformat(),
         "split": dataset.split,
         "recipe": dataset.recipe,
+        "budget_bytes": dataset.budget_bytes,
         "model_revision": REVISION,
         "pipeline_fingerprint": pipeline_fingerprint(),
         "dataset_sha256": hashlib.sha256(dataset.model_dump_json().encode()).hexdigest(),

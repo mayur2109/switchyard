@@ -47,3 +47,22 @@ def test_select_context_fails_open_with_original_payload_on_runtime_error():
     assert result["selected_ids"] == ["one", "two"]
     assert result["selected_items"][0]["id"] == "one"
     assert result["error"]["code"] == "runtime_unavailable"
+
+
+def test_forward_candidates_applies_a_plan_without_mutating_the_original_envelope():
+    from switchyard.middleware import forward_candidates
+
+    envelope = {"tool": "search", "decision_candidates": {"items": candidates()}}
+    plan = {"applied": False, "recommended_selected_items": [candidates()[1]]}
+
+    forwarded = forward_candidates(envelope, plan)
+
+    assert forwarded["decision_candidates"]["items"] == [candidates()[1]]
+    assert envelope["decision_candidates"]["items"] == candidates()
+
+
+def test_forward_candidates_fails_open_when_a_plan_is_unavailable():
+    from switchyard.middleware import forward_candidates
+
+    envelope = {"decision_candidates": {"items": candidates()}}
+    assert forward_candidates(envelope, None) == envelope

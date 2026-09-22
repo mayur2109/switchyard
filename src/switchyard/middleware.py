@@ -1,5 +1,6 @@
 """Small adapters for embedding Switchyard in custom agent loops."""
 
+import copy
 from collections.abc import Sequence
 from typing import Any
 
@@ -99,3 +100,20 @@ async def aselect_context(
             "recommended_selected_items": payload,
             "error": error.as_dict(),
         }
+
+
+def forward_candidates(envelope: dict, plan: dict | None) -> dict:
+    """Return a copied harness envelope with the plan's candidate payload applied."""
+    forwarded = copy.deepcopy(envelope)
+    if not isinstance(plan, dict):
+        return forwarded
+    candidates = plan.get("selected_items" if plan.get("applied") else "recommended_selected_items")
+    if not isinstance(candidates, list):
+        return forwarded
+    decision_candidates = forwarded.get("decision_candidates")
+    if not isinstance(decision_candidates, dict) or not isinstance(
+        decision_candidates.get("items"), list
+    ):
+        return forwarded
+    decision_candidates["items"] = copy.deepcopy(candidates)
+    return forwarded
