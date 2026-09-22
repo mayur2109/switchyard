@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "local-decision-kit"
+version = "0.1.0"
+description = "Local typed decisions for agents and applications, powered by Laya"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+license = "Apache-2.0"
+dependencies = [
+  "pydantic>=2.11,<3", "typer>=0.16,<1", "platformdirs>=4,<5",
+  "mcp>=1.12,<2", "huggingface-hub>=0.30,<2",
+]
+
+[project.optional-dependencies]
+inference = ["laya==0.3.5", "torch>=2.6,<3", "transformers>=4.48,<5"]
+
+[project.scripts]
+ldk = "local_decision_kit.cli:app"
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "pytest-asyncio>=0.26,<2", "ruff>=0.12,<1", "build>=1,<2"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/local_decision_kit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
