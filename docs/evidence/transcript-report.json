@@ -1,0 +1,101 @@
+{
+  "report_version": 1,
+  "created_at": "2026-09-23T10:44:48.656624+00:00",
+  "split": "transcript-replay",
+  "recipe": "candidate-relevance@1",
+  "budget_ratio": 0.5,
+  "seed": 42,
+  "corpus_sha256": "acb97b53687e295ed5c3a69cff335dc5d65b3cffde0d260f749acbcc34a94ffc",
+  "sample_sha256": "59d2f9828a3f31def75e50a92cc01243966515231f67c8fe88b11ba9c9748952",
+  "eligible_unique_cases": 53881,
+  "counts": {
+    "claude_files": 1685,
+    "tool_outputs": 133603,
+    "excluded_task_length": 61787,
+    "excluded_output_length": 13459,
+    "duplicate_cases": 4476,
+    "malformed_lines": 11,
+    "codex_files": 216
+  },
+  "usage_by_source": {
+    "claude": {
+      "response_records": 91693,
+      "input_tokens": 2992480,
+      "output_tokens": 65719188,
+      "cache_creation_input_tokens": 399474934,
+      "cache_read_input_tokens": 21727843673
+    },
+    "codex": {
+      "response_records": 4051,
+      "input_tokens": 474630067,
+      "cached_input_tokens": 464556672,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 864376,
+      "reasoning_output_tokens": 227880,
+      "total_tokens": 475494443
+    }
+  },
+  "token_measurement": "tiktoken 0.12.0 cl100k_base; reference encoding, not Claude billing",
+  "quality_labels": false,
+  "gate_eligible": false,
+  "actual_provider_tokens_saved": null,
+  "model_revisions": [
+    "1c5edc17a7acd8701df6fc341c0d179f1c62c982"
+  ],
+  "runtime": {
+    "ready": true,
+    "state": "ready",
+    "device": "cpu",
+    "models": {
+      "english": {
+        "revision": "1c5edc17a7acd8701df6fc341c0d179f1c62c982"
+      },
+      "multilingual": {
+        "revision": "1c5edc17a7acd8701df6fc341c0d179f1c62c982"
+      }
+    }
+  },
+  "replay": {
+    "claude": {
+      "cases": 100,
+      "sessions": 100,
+      "input_chars": 212438,
+      "selected_chars": 211408,
+      "input_bytes": 215396,
+      "selected_bytes": 214366,
+      "chunks": 322,
+      "selected_chunks": 319,
+      "uncertain_omitted": 0,
+      "item_errors": 0,
+      "input_tokens": 57977,
+      "selected_tokens": 57596,
+      "request_errors": 3,
+      "p50_ms": 4896.3,
+      "p95_ms": 37568.26
+    },
+    "codex": {
+      "cases": 100,
+      "sessions": 100,
+      "input_chars": 256007,
+      "selected_chars": 250795,
+      "input_bytes": 258580,
+      "selected_bytes": 252732,
+      "chunks": 373,
+      "selected_chunks": 361,
+      "uncertain_omitted": 0,
+      "item_errors": 3,
+      "input_tokens": 66781,
+      "selected_tokens": 64831,
+      "request_errors": 0,
+      "p50_ms": 3628.375,
+      "p95_ms": 33490.97
+    }
+  },
+  "limitations": [
+    "Offline replay, no paid provider calls or billing savings.",
+    "Length-filtered sample; inherited fork histories may overlap.",
+    "Usage deduplicated by response ID; missing IDs excluded.",
+    "No relevance labels: reduction is not evidence of safe omission.",
+    "800-character chunking; no source text exported."
+  ]
+}

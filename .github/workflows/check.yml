@@ -21,6 +21,6 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --group dev
-      - run: uv run ruff check src tests --output-format concise
+      - run: uv run ruff check src tests scripts --output-format concise
       - run: uv run pytest -q
       - run: uv build

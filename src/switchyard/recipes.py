@@ -132,20 +132,32 @@ def select_items(engine, request: SelectionRequest) -> dict:
         )
         ranked.append((index, result))
 
-    mandatory = [(index, result) for index, result in ranked if result["mandatory"]]
+    # Mandatory and uncertain/error assessments are always retained in the recommendation.
+    # Only irrelevant non-mandatory items may be omitted; remaining budget fills by score.
+    protected = [
+        (index, result)
+        for index, result in ranked
+        if result["mandatory"]
+        or "error" in result
+        or result["assessment"] not in {"irrelevant", "relevant"}
+    ]
     optional = sorted(
-        ((index, result) for index, result in ranked if not result["mandatory"]),
+        (
+            (index, result)
+            for index, result in ranked
+            if not result["mandatory"]
+            and result["assessment"] == "relevant"
+            and result["recommended_disposition"] != "omit"
+        ),
         key=lambda pair: (-pair[1]["score"], pair[0]),
     )
     recommended = []
     used = 0
-    for index, result in mandatory:
+    for index, result in protected:
         candidate = by_id[result["id"]].model_dump()
         recommended.append((index, result, candidate))
         used += _item_bytes(candidate)
     for index, result in optional:
-        if result["recommended_disposition"] == "omit":
-            continue
         candidate = by_id[result["id"]].model_dump()
         size = _item_bytes(candidate)
         if used + size <= budget_bytes:
@@ -155,8 +167,13 @@ def select_items(engine, request: SelectionRequest) -> dict:
     recommended.sort(key=lambda value: value[0])
     recommended_ids = [result["id"] for _, result, _ in recommended]
     for result in evaluated["items"]:
-        if result["id"] not in recommended_ids and not result["mandatory"]:
-            result["recommended_disposition"] = "omit"
+        if result["id"] in recommended_ids:
+            continue
+        if result["mandatory"] or "error" in result:
+            continue
+        if result["assessment"] not in {"irrelevant", "relevant"}:
+            continue
+        result["recommended_disposition"] = "omit"
     policy_applied = evaluated["mode"] == "filtered"
     selected_ids = recommended_ids if policy_applied else [item.id for item in request.items]
     selected_items = [by_id[item_id].model_dump() for item_id in selected_ids]
@@ -176,6 +193,7 @@ def select_items(engine, request: SelectionRequest) -> dict:
         "recommended_selected_bytes": recommended_selected_bytes,
         "estimated_selected_tokens": math.ceil(selected_bytes / 4),
         "estimated_recommended_tokens": math.ceil(recommended_selected_bytes / 4),
+        "budget_overflow": recommended_selected_bytes > budget_bytes,
         "recommended_selected_ids": recommended_ids,
         "selected_ids": selected_ids,
         "selected_items": selected_items,

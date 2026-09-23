@@ -41,6 +41,104 @@ smaller cited payload for the main agent
 The local process keeps model weights warm, accepts typed requests, and communicates over a
 user-owned Unix socket. The first model download needs network access. Inference does not.
 
+## With and without Switchyard
+
+See [the benchmark methodology](BENCHMARKS.md) for reproducible local transcript replay,
+recorded usage accounting, token-count definitions, and the limits of unlabeled results.
+
+```mermaid
+flowchart LR
+    A[Retrieved candidates] --> B[Without selection]
+    B --> C[All candidate text sent to model]
+    A --> D[Local Switchyard evaluation]
+    D --> E[Review selection recommendation]
+    E --> F[Caller applies selected payload]
+    F --> G[Less candidate text sent to model]
+```
+
+Selection must happen before the provider request to reduce its input. Adding an MCP tool alone
+does not intercept requests or reduce a bill. Passing the entire selection report to the model can
+add context instead, because that report contains original text and assessment metadata.
+
+### Measured smoke example
+
+![Smoke comparison: 222 input characters versus 128 recommended characters, a 42.3% reduction if applied.](docs/assets/smoke-comparison.svg)
+
+The saved local run from September 22, 2026 evaluated our four-item
+[synthetic smoke fixture](examples/evaluation/smoke.json). It recommended keeping two items and
+omitting two, retaining both labeled relevant items and the single mandatory item.
+The [complete report](docs/evidence/smoke-report.json) includes the model revision, dataset hash,
+pipeline fingerprint, individual measurements, and limitations.
+
+| Measurement | Result |
+| --- | ---: |
+| Original candidate text | 222 characters |
+| Recommended candidate text | 128 characters |
+| Recommended reduction | 94 characters / 42.3% |
+| Relevant items retained | 2 of 2 |
+| Mandatory items retained | 1 of 1 |
+| Total benchmark wall time | 2.31 seconds |
+| Measured provider tokens or dollars saved | Not measured |
+
+This is a historical smoke result, not a holdout or a prediction of production performance.
+The 94-character difference becomes 23.5 estimated tokens using the report's characters-divided-by-four
+heuristic. No provider tokenizer or billing API measured that figure. The lexical baseline also
+retained both relevant items; this fixture does not establish an advantage over simple rules.
+The run stayed advisory and did not enable omission.
+
+### Real transcript replay
+
+![Real transcripts: offline selection replay of Claude and Codex tool outputs.](docs/assets/transcript-replay.svg)
+
+A private local run inventoried Claude and Codex session archives on this machine, then replayed a
+deterministic sample of 100 tool-output cases per source through the warm Switchyard daemon. Raw
+transcripts stay private. The [public aggregate report](docs/evidence/transcript-report.json)
+contains hashes, usage totals, replay counts, latency, and limitations only.
+
+| Measurement | Claude | Codex |
+| --- | ---: | ---: |
+| Sampled cases / sessions | 100 / 100 | 100 / 100 |
+| Original tool-text tokens (`cl100k_base`) | 57,977 | 66,781 |
+| Recommended tool-text tokens | 57,596 | 64,831 |
+| Recommended reduction | 381 / 0.7% | 1,950 / 2.9% |
+| Uncertain chunks recommended for omission | 0 | 0 |
+| Request errors (kept full text) | 3 | 0 |
+| p50 / p95 request latency | 4.9s / 37.6s | 3.6s / 33.5s |
+| Measured provider tokens or dollars saved | Not measured | Not measured |
+
+Historical usage recorded in those same archives (deduplicated by response ID; not invoices):
+
+| Source | Response records | Input tokens | Output tokens | Cache notes |
+| --- | ---: | ---: | ---: | --- |
+| Claude | 91,693 | 2,992,480 | 65,719,188 | cache write 399,474,934; cache read 21,727,843,673 |
+| Codex | 4,051 | 474,630,067 | 864,376 | cached input 464,556,672; reasoning output 227,880 |
+
+The small recommended reductions are expected under the current safety rule: uncertain and failed
+predictions are retained, and only clearly irrelevant non-mandatory chunks may be recommended for
+omission. A 50% byte budget alone does not force large cuts when most chunks are uncertain. This
+replay has no human relevance labels, so it cannot enable automatic filtering and must not be read
+as billing savings.
+
+### Potential savings at larger input sizes
+
+![Illustrative input-token scenarios: 10,000 without filtering; 8,000, 6,000, or 4,000 after removing 25%, 50%, or 75% of candidate tokens.](docs/assets/potential-savings.svg)
+
+These scenarios are arithmetic examples, not benchmark results. They assume 2,000 fixed prompt
+tokens and 8,000 candidate tokens, with no extra prompt overhead. Removing half the candidate
+tokens reduces total input by 40%, not 50%.
+
+For an uncached input rate of **P dollars per million tokens**, saving 4,000 input tokens across
+1,000 requests would avoid **4 × P dollars** in input charges. Output charges, local CPU time,
+electricity, caching, retries, and changes in task quality need separate accounting.
+Switchyard adds a local inference step, so reduced input does not guarantee lower end-to-end latency.
+
+The charts are reproducible SVG assets rather than screenshots of an interface that does not exist.
+Rebuild them from the saved report with:
+
+```bash
+python3 scripts/render_readme_charts.py
+```
+
 ## What Switchyard is and is not
 
 Switchyard is:
@@ -184,6 +282,12 @@ The response includes two payloads:
 
 Before a reviewed policy is enabled, `selected_items` remains the original input. This makes the
 default behavior advisory and reversible.
+
+Current integration caveat: `forward_candidates()` explicitly applies
+`recommended_selected_items` when a plan is advisory. Calling that helper therefore bypasses the
+policy gate. For shadow evaluation, forward `plan["selected_items"]` and inspect recommendations
+separately. The transcript benchmark records recommended omissions, including uncertain items
+that the current budget allocator can drop; it does not establish that those omissions are safe.
 
 ## Use it from Python
 

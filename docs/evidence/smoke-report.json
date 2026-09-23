@@ -1,0 +1,94 @@
+{
+  "report_version": 1,
+  "created_at": "2026-09-22T14:26:40.399087+00:00",
+  "split": "smoke",
+  "recipe": "candidate-relevance@1",
+  "budget_bytes": 1200,
+  "model_revision": "1c5edc17a7acd8701df6fc341c0d179f1c62c982",
+  "pipeline_fingerprint": "fcf2d09d18a5b9141c1a56198ef30c5b8ece511aea039a9a6872f222a519f3bc",
+  "dataset_sha256": "581e708dd41443b7229f3d5938787efc62da3ff922987d46c7b41834d2b27a58",
+  "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+  "elapsed_seconds": 2.309174476074986,
+  "metrics": {
+    "items": 4,
+    "relevant_items": 2,
+    "mandatory_items": 1,
+    "relevant_retention": 1.0,
+    "mandatory_preserved": true,
+    "errors": 0,
+    "would_omit": 2,
+    "p50_ms": 1152.57,
+    "p95_ms": 1333.26,
+    "estimated_content_tokens_removed": 23.5,
+    "estimate_method": "Unicode characters / 4; excludes agent overhead, not billing",
+    "actual_provider_tokens_saved": null,
+    "gate_eligible": false
+  },
+  "rows": [
+    {
+      "id": "billing-routing-1/billing-policy",
+      "relevant": true,
+      "mandatory": true,
+      "would_omit": false,
+      "error": false,
+      "elapsed_ms": 1333.26,
+      "input_chars": 70,
+      "selected_chars": 70,
+      "lexical_keep": true,
+      "models": [
+        "english"
+      ]
+    },
+    {
+      "id": "billing-routing-1/weather-note",
+      "relevant": false,
+      "mandatory": false,
+      "would_omit": true,
+      "error": false,
+      "elapsed_ms": 1333.26,
+      "input_chars": 49,
+      "selected_chars": 0,
+      "lexical_keep": false,
+      "models": [
+        "english"
+      ]
+    },
+    {
+      "id": "billing-routing-2/escalation-owner",
+      "relevant": true,
+      "mandatory": false,
+      "would_omit": false,
+      "error": false,
+      "elapsed_ms": 971.88,
+      "input_chars": 58,
+      "selected_chars": 58,
+      "lexical_keep": true,
+      "models": [
+        "english"
+      ]
+    },
+    {
+      "id": "billing-routing-2/garden-note",
+      "relevant": false,
+      "mandatory": false,
+      "would_omit": true,
+      "error": false,
+      "elapsed_ms": 971.88,
+      "input_chars": 45,
+      "selected_chars": 0,
+      "lexical_keep": false,
+      "models": [
+        "english"
+      ]
+    }
+  ],
+  "baseline": {
+    "unfiltered_relevant_retention": 1.0,
+    "lexical_relevant_retention": 1.0
+  },
+  "limitations": [
+    "No coding-agent task completion or provider billing measured",
+    "Per-item latency records its enclosing request latency",
+    "Holdout provenance is supplied by the dataset author"
+  ]
+}
